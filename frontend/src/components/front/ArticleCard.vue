@@ -1,8 +1,12 @@
 <template>
+  <!-- 文章卡片组件：点击跳转到文章详情页 -->
   <article class="article-card" @click="$router.push(`/article/${article.id}`)">
     <div class="card-body">
+      <!-- 文章标题 -->
       <h2 class="card-title">{{ article.title }}</h2>
+      <!-- 文章摘要 -->
       <p class="card-summary">{{ article.summary || '暂无摘要' }}</p>
+      <!-- 元信息：日期 + 分类 -->
       <div class="card-meta">
         <span class="meta-date">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -14,6 +18,7 @@
         </span>
       </div>
     </div>
+    <!-- 悬停时显示的箭头 -->
     <div class="card-arrow">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
     </div>
@@ -23,16 +28,19 @@
 <script setup>
 import { computed } from 'vue'
 
+/** 组件属性：文章对象和分类列表 */
 const props = defineProps({
   article: { type: Object, required: true },
   categories: { type: Array, default: () => [] }
 })
 
+/** 根据文章分类ID匹配分类名称 */
 const category = computed(() => {
   if (!props.article.categoryId) return null
   return props.categories.find(c => c.id === props.article.categoryId)
 })
 
+/** 格式化日期为中文格式 */
 function formatDate(dateStr) {
   if (!dateStr) return ''
   const d = new Date(dateStr)

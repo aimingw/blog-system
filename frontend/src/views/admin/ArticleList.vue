@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- 页面头部：标题 + 新建按钮 -->
     <div class="page-header">
       <h2 class="page-title">文章管理</h2>
       <el-button type="primary" @click="$router.push('/admin/articles/new')">
@@ -8,9 +9,11 @@
       </el-button>
     </div>
 
+    <!-- 文章列表表格 -->
     <el-table :data="articles" v-loading="loading" class="styled-table">
       <el-table-column prop="id" label="ID" width="70" align="center" />
       <el-table-column prop="title" label="标题" min-width="200" show-overflow-tooltip />
+      <!-- 状态列：已发布 / 草稿 -->
       <el-table-column label="状态" width="90" align="center">
         <template #default="{ row }">
           <span class="status-tag" :class="row.status === 1 ? 'published' : 'draft'">
@@ -21,6 +24,7 @@
       <el-table-column label="创建时间" width="160" align="center">
         <template #default="{ row }">{{ formatDate(row.createTime) }}</template>
       </el-table-column>
+      <!-- 操作列 -->
       <el-table-column label="操作" width="200" align="center">
         <template #default="{ row }">
           <el-button size="small" text type="primary" @click="$router.push(`/admin/articles/${row.id}/edit`)">编辑</el-button>
@@ -29,6 +33,7 @@
       </el-table-column>
     </el-table>
 
+    <!-- 分页组件（仅在超过一页时显示） -->
     <div class="pagination-wrap" v-if="total > 10">
       <el-pagination background layout="prev, pager, next" :total="total" v-model:current-page="page" @current-change="fetchList" />
     </div>
@@ -40,16 +45,22 @@ import { ref, onMounted } from 'vue'
 import { getAdminArticles, deleteArticle } from '../../api'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
+/** 文章列表数据 */
 const articles = ref([])
+/** 加载状态 */
 const loading = ref(false)
+/** 当前页码 */
 const page = ref(1)
+/** 总记录数 */
 const total = ref(0)
 
+/** 格式化日期为中文格式 */
 function formatDate(s) {
   if (!s) return ''
   return new Date(s).toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
 }
 
+/** 获取文章列表 */
 async function fetchList() {
   loading.value = true
   try {
@@ -59,12 +70,13 @@ async function fetchList() {
   } finally { loading.value = false }
 }
 
+/** 删除文章（带确认弹窗） */
 async function handleDelete(id) {
   try {
     await ElMessageBox.confirm('确定删除该文章？', '提示', { type: 'warning' })
     await deleteArticle(id)
     ElMessage.success('已删除')
-    fetchList()
+    fetchList() // 刷新列表
   } catch (e) {}
 }
 
@@ -85,7 +97,7 @@ onMounted(fetchList)
   color: var(--color-text);
 }
 
-/* ====== Table ====== */
+/* ====== 表格样式 ====== */
 .styled-table {
   border-radius: var(--radius-md);
   overflow: hidden;
@@ -112,7 +124,7 @@ onMounted(fetchList)
   border-bottom: 1px solid var(--color-border-light);
 }
 
-/* Status tags */
+/* 状态标签 */
 .status-tag {
   display: inline-block;
   padding: 2px 10px;

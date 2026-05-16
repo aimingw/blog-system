@@ -2,7 +2,9 @@
   <div class="dashboard">
     <h2 class="page-title">仪表盘</h2>
 
+    <!-- 统计卡片区域 -->
     <el-row :gutter="20">
+      <!-- 文章总数 -->
       <el-col :span="8">
         <div class="stat-card">
           <div class="stat-icon articles-icon">
@@ -15,6 +17,7 @@
         </div>
       </el-col>
 
+      <!-- 分类数量 -->
       <el-col :span="8">
         <div class="stat-card">
           <div class="stat-icon categories-icon">
@@ -27,6 +30,7 @@
         </div>
       </el-col>
 
+      <!-- 待审核评论 -->
       <el-col :span="8">
         <div class="stat-card">
           <div class="stat-icon comments-icon">
@@ -46,11 +50,16 @@
 import { reactive, onMounted } from 'vue'
 import { getAdminArticles, getAdminCategories, getAdminComments } from '../../api'
 
+/** 仪表盘统计数据 */
 const stats = reactive({ articles: 0, categories: 0, comments: 0 })
 
+/** 页面挂载时异步加载各项统计数据 */
 onMounted(async () => {
+  // 获取文章总数
   try { const r = await getAdminArticles({ page: 1, size: 1 }); stats.articles = r.data.total } catch (e) {}
+  // 获取分类数量
   try { const r = await getAdminCategories(); stats.categories = (r.data || []).length } catch (e) {}
+  // 获取待审核评论数
   try { const r = await getAdminComments({ page: 1, size: 1, status: 0 }); stats.comments = r.data.total } catch (e) {}
 })
 </script>

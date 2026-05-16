@@ -1,12 +1,12 @@
 <template>
   <div class="home">
-    <!-- Hero Section -->
+    <!-- 主页头部：博客标题和副标题 -->
     <section class="hero">
       <h1 class="hero-title">{{ heroTitle }}</h1>
       <p class="hero-subtitle">{{ heroSubtitle }}</p>
     </section>
 
-    <!-- Announcement -->
+    <!-- 站点公告区 -->
     <div v-if="announcement" class="announcement">
       <div class="announcement-inner">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
@@ -14,15 +14,17 @@
       </div>
     </div>
 
-    <!-- Article List -->
+    <!-- 文章列表 -->
     <div class="articles-section">
       <ArticleCard v-for="article in articles" :key="article.id" :article="article" :categories="categories" />
 
+      <!-- 空状态 -->
       <div v-if="articles.length === 0 && !loading" class="empty-state">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <p>还没有文章</p>
       </div>
 
+      <!-- 分页 -->
       <div class="pagination" v-if="total > size">
         <el-pagination
           background
@@ -44,17 +46,28 @@ import { useAppStore } from '../../stores/app'
 import ArticleCard from '../../components/front/ArticleCard.vue'
 
 const appStore = useAppStore()
+
+/** 文章列表 */
 const articles = ref([])
+/** 分类列表（用于显示文章所属分类名称） */
 const categories = ref([])
+/** 加载状态 */
 const loading = ref(false)
+/** 当前页码 */
 const page = ref(1)
+/** 每页条数 */
 const size = ref(10)
+/** 总文章数 */
 const total = ref(0)
 
+/** 从站点配置获取公告 */
 const announcement = computed(() => appStore.siteConfig?.announcement || '')
+/** 从站点配置获取主标题 */
 const heroTitle = computed(() => appStore.siteConfig?.title || 'My Blog')
+/** 从站点配置获取副标题 */
 const heroSubtitle = computed(() => appStore.siteConfig?.subtitle || '用文字记录思考与发现')
 
+/** 获取文章列表 */
 async function fetchArticles() {
   loading.value = true
   try {
@@ -73,7 +86,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* ====== Hero ====== */
+/* ====== 主页头部 ====== */
 .hero {
   text-align: center;
   padding: 48px 24px 36px;
@@ -93,7 +106,7 @@ onMounted(async () => {
   font-weight: 400;
 }
 
-/* ====== Announcement ====== */
+/* ====== 公告 ====== */
 .announcement {
   margin-bottom: 24px;
 }
@@ -110,7 +123,7 @@ onMounted(async () => {
   line-height: 1.6;
 }
 
-/* ====== Articles ====== */
+/* ====== 文章列表区 ====== */
 .articles-section {
   max-width: var(--content-wide);
   margin: 0 auto;
@@ -138,7 +151,7 @@ onMounted(async () => {
   padding-bottom: 12px;
 }
 
-/* Override Element Plus pagination */
+/* 覆盖 Element Plus 分页样式 */
 .pagination :deep(.el-pagination .btn-prev),
 .pagination :deep(.el-pagination .btn-next),
 .pagination :deep(.el-pagination .el-pager li) {

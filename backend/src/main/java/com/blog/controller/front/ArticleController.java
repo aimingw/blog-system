@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 前台文章控制器
+ * 提供公开访问的文章查询接口（无需登录）
+ */
 @RestController("frontArticleController")
 @RequestMapping("/api/front/articles")
 public class ArticleController {
@@ -21,9 +25,13 @@ public class ArticleController {
         this.articleService = articleService;
     }
 
+    /**
+     * 分页查询已发布文章列表
+     * 强制只返回状态为"已发布"的文章
+     */
     @GetMapping
     public Result<PageResult<Article>> list(ArticleQueryDTO query) {
-        query.setStatus(1);
+        query.setStatus(1); // 前台只展示已发布文章
         IPage<Article> page = articleService.pageQuery(query);
         PageResult<Article> result = new PageResult<>();
         result.setRecords(page.getRecords());
@@ -33,9 +41,13 @@ public class ArticleController {
         return Result.success(result);
     }
 
+    /**
+     * 查看文章详情（含上一篇/下一篇导航）
+     */
     @GetMapping("/{id}")
     public Result<Map<String, Object>> detail(@PathVariable Long id) {
         Article article = articleService.getById(id);
+        // 获取相邻文章用于上下篇导航
         Article prev = articleService.getPrevArticle(id);
         Article next = articleService.getNextArticle(id);
         Map<String, Object> data = new HashMap<>();

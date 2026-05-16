@@ -11,6 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * 标签服务实现类
+ */
 @Service
 public class TagServiceImpl implements TagService {
 
@@ -41,10 +44,14 @@ public class TagServiceImpl implements TagService {
         }
     }
 
+    /**
+     * 删除标签及其所有关联关系（事务保证一致性）
+     */
     @Override
     @Transactional
     public void deleteById(Long id) {
         tagMapper.deleteById(id);
+        // 同时删除该标签与文章的所有关联
         articleTagMapper.delete(new LambdaQueryWrapper<ArticleTag>()
                 .eq(ArticleTag::getTagId, id));
     }

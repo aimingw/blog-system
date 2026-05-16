@@ -2,11 +2,14 @@
   <div class="article-edit">
     <h2 class="page-title">{{ isEdit ? '编辑文章' : '新建文章' }}</h2>
 
+    <!-- 文章编辑表单 -->
     <el-form :model="form" :rules="rules" ref="formRef" label-width="80px" class="edit-form">
+      <!-- 标题 -->
       <el-form-item label="标题" prop="title">
         <el-input v-model="form.title" placeholder="文章标题" maxlength="200" show-word-limit />
       </el-form-item>
 
+      <!-- 分类和标签（并排） -->
       <el-row :gutter="16">
         <el-col :span="12">
           <el-form-item label="分类">
@@ -24,6 +27,7 @@
         </el-col>
       </el-row>
 
+      <!-- 发布状态 -->
       <el-form-item label="状态">
         <el-radio-group v-model="form.status">
           <el-radio-button :value="1">已发布</el-radio-button>
@@ -31,8 +35,10 @@
         </el-radio-group>
       </el-form-item>
 
+      <!-- Markdown 编辑器和预览（左右分栏） -->
       <el-form-item label="内容">
         <div class="editor-panels">
+          <!-- 编辑器面板 -->
           <div class="editor-pane">
             <div class="pane-header">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><path d="M21 16v5H3V3h12"/></svg>
@@ -44,6 +50,7 @@
               placeholder="使用 Markdown 格式编写文章..."
             ></textarea>
           </div>
+          <!-- 预览面板 -->
           <div class="editor-pane">
             <div class="pane-header">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
@@ -54,6 +61,7 @@
         </div>
       </el-form-item>
 
+      <!-- 操作按钮 -->
       <el-form-item>
         <el-button type="primary" :loading="saving" @click="handleSave" class="save-btn">
           <svg v-if="!saving" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:4px;vertical-align:-2px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
@@ -73,27 +81,41 @@ import { getAdminArticle, createArticle, updateArticle, getAdminCategories, getA
 
 const route = useRoute()
 const router = useRouter()
+/** 注入 Markdown 渲染函数 */
 const marked = inject('marked')
+
+/** 表单引用 */
 const formRef = ref(null)
+/** 保存按钮加载状态 */
 const saving = ref(false)
+/** 分类列表（用于下拉选择） */
 const categories = ref([])
+/** 标签列表（用于多选） */
 const tags = ref([])
+
+/** 文章表单数据 */
 const form = reactive({
   id: null,
   title: '',
   content: '',
   categoryId: null,
   tagIds: [],
-  status: 1
+  status: 1 // 默认已发布
 })
+
+/** 表单校验规则 */
 const rules = { title: [{ required: true, message: '请输入标题', trigger: 'blur' }] }
+
+/** 是否编辑模式（通过路由参数判断） */
 const isEdit = computed(() => !!route.params.id)
 
+/** 实时渲染 Markdown 为 HTML 用于预览 */
 const renderedContent = computed(() => {
   if (!form.content) return '<p style="color:var(--color-text-muted)">输入内容后在此预览</p>'
   return marked(form.content)
 })
 
+/** 保存文章（新增或更新） */
 async function handleSave() {
   const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
@@ -110,9 +132,13 @@ async function handleSave() {
   } finally { saving.value = false }
 }
 
+/** 页面加载时获取分类、标签；编辑模式下加载文章数据 */
 onMounted(async () => {
+  // 加载分类列表
   try { const r = await getAdminCategories(); categories.value = r.data || [] } catch (e) {}
+  // 加载标签列表
   try { const r = await getAdminTags(); tags.value = r.data || [] } catch (e) {}
+  // 编辑模式：回填文章数据
   if (isEdit.value) {
     try {
       const res = await getAdminArticle(route.params.id)
@@ -168,7 +194,7 @@ onMounted(async () => {
   border-color: var(--color-primary-dark);
 }
 
-/* Editor panels */
+/* 编辑器分栏布局 */
 .editor-panels {
   display: flex;
   gap: 12px;

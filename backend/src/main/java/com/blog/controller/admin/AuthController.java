@@ -6,6 +6,10 @@ import com.blog.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * 管理员认证控制器
+ * 处理管理员登录、登出等认证相关接口
+ */
 @RestController
 @RequestMapping("/api/admin")
 public class AuthController {
@@ -16,6 +20,10 @@ public class AuthController {
         this.userService = userService;
     }
 
+    /**
+     * 管理员登录
+     * 验证用户名密码，返回JWT Token
+     */
     @PostMapping("/login")
     public Result<?> login(@Valid @RequestBody LoginDTO loginDTO) {
         return Result.success(userService.login(loginDTO));

@@ -1,9 +1,10 @@
 <template>
   <div class="login-page">
-    <!-- Geometric pattern background -->
+    <!-- 几何图案背景装饰 -->
     <div class="bg-pattern"></div>
 
     <div class="login-card">
+      <!-- 登录头部：头像图标 + 标题 -->
       <div class="login-header">
         <div class="login-avatar">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -12,6 +13,7 @@
         <p>登录以继续管理您的博客</p>
       </div>
 
+      <!-- 登录表单 -->
       <el-form ref="formRef" :model="form" :rules="rules" class="login-form" @keyup.enter="handleLogin">
         <el-form-item prop="username">
           <el-input
@@ -61,26 +63,33 @@ import { useUserStore } from '../../stores/user'
 
 const router = useRouter()
 const userStore = useUserStore()
+
+/** 表单引用 */
 const formRef = ref(null)
+/** 登录按钮加载状态 */
 const loading = ref(false)
+/** 登录表单数据 */
 const form = reactive({ username: '', password: '' })
+/** 表单校验规则 */
 const rules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
 }
 
+/** 处理登录：表单校验 -> 调用登录接口 -> 存储Token -> 跳转后台首页 */
 async function handleLogin() {
   const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
   loading.value = true
   try {
     const res = await login({ username: form.username, password: form.password })
+    // 保存登录状态和用户信息
     userStore.login(res.data.token)
     userStore.setUserInfo(res.data.user)
     ElMessage.success('登录成功')
     router.push('/admin/dashboard')
   } catch (e) {
-    // error handled by interceptor
+    // 错误由拦截器统一处理
   } finally {
     loading.value = false
   }
@@ -99,7 +108,7 @@ async function handleLogin() {
   overflow: hidden;
 }
 
-/* Subtle geometric pattern */
+/* 柔和几何图案背景 */
 .bg-pattern {
   position: absolute;
   inset: 0;
@@ -110,7 +119,7 @@ async function handleLogin() {
   pointer-events: none;
 }
 
-/* Card */
+/* 登录卡片 */
 .login-card {
   position: relative;
   z-index: 1;
@@ -153,7 +162,7 @@ async function handleLogin() {
   color: var(--color-text-secondary);
 }
 
-/* Form */
+/* 表单样式 */
 .login-form :deep(.el-input--large) {
   --el-input-border-radius: 8px;
 }

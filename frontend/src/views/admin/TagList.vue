@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- 页面头部 -->
     <div class="page-header">
       <h2 class="page-title">标签管理</h2>
       <el-button type="primary" @click="handleAdd">
@@ -8,6 +9,7 @@
       </el-button>
     </div>
 
+    <!-- 标签列表表格 -->
     <el-table :data="tags" class="styled-table">
       <el-table-column prop="id" label="ID" width="80" align="center" />
       <el-table-column prop="name" label="名称" min-width="200" />
@@ -22,6 +24,7 @@
       </el-table-column>
     </el-table>
 
+    <!-- 新增/编辑弹窗 -->
     <el-dialog v-model="dialogVisible" :title="editing.id ? '编辑标签' : '新增标签'" width="420px" class="styled-dialog">
       <el-form :model="editing" :rules="rules" ref="dialogFormRef" label-width="0">
         <el-form-item prop="name">
@@ -41,25 +44,36 @@ import { ref, reactive, onMounted } from 'vue'
 import { getAdminTags, createTag, updateTag, deleteTag } from '../../api'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
+/** 标签列表 */
 const tags = ref([])
+/** 弹窗显示状态 */
 const dialogVisible = ref(false)
+/** 保存按钮加载状态 */
 const saving = ref(false)
+/** 弹窗表单引用 */
 const dialogFormRef = ref(null)
+/** 弹窗中正在编辑的标签数据 */
 const editing = reactive({ id: null, name: '' })
+/** 表单校验规则 */
 const rules = { name: [{ required: true, message: '请输入名称', trigger: 'blur' }] }
 
+/** 格式化日期 */
 function formatDate(s) {
   if (!s) return ''
   return new Date(s).toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
 }
 
+/** 获取标签列表 */
 async function fetchList() {
   try { const r = await getAdminTags(); tags.value = r.data || [] } catch (e) {}
 }
 
+/** 打开新增弹窗 */
 function handleAdd() { editing.id = null; editing.name = ''; dialogVisible.value = true }
+/** 打开编辑弹窗（回填数据） */
 function handleEdit(row) { editing.id = row.id; editing.name = row.name; dialogVisible.value = true }
 
+/** 保存标签（新增或更新） */
 async function handleSave() {
   const valid = await dialogFormRef.value.validate().catch(() => false)
   if (!valid) return
@@ -73,6 +87,7 @@ async function handleSave() {
   } catch (e) {} finally { saving.value = false }
 }
 
+/** 删除标签（带确认弹窗） */
 async function handleDelete(id) {
   try {
     await ElMessageBox.confirm('确定删除该标签？', '提示', { type: 'warning' })
@@ -99,6 +114,7 @@ onMounted(fetchList)
   color: var(--color-text);
 }
 
+/* 表格样式 */
 .styled-table {
   border-radius: var(--radius-md);
   overflow: hidden;
@@ -125,6 +141,7 @@ onMounted(fetchList)
   border-bottom: 1px solid var(--color-border-light);
 }
 
+/* 弹窗样式 */
 .styled-dialog :deep(.el-dialog) {
   border-radius: var(--radius-lg);
 }

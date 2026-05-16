@@ -9,12 +9,21 @@ import javax.crypto.SecretKey;
 import java.util.Base64;
 import java.util.Date;
 
+/**
+ * JWT工具类
+ * 负责生成、解析和校验JWT令牌
+ */
 @Component
 public class JwtUtils {
 
+    /** HMAC签名密钥 */
     private final SecretKey key;
+    /** Token过期时间（毫秒） */
     private final long expiration;
 
+    /**
+     * 构造方法，从配置文件注入密钥和过期时间
+     */
     public JwtUtils(@Value("${jwt.secret}") String secret,
                     @Value("${jwt.expiration}") long expiration) {
         byte[] keyBytes = Base64.getDecoder().decode(secret);
@@ -22,6 +31,12 @@ public class JwtUtils {
         this.expiration = expiration;
     }
 
+    /**
+     * 生成JWT Token
+     * @param userId   用户ID（存入subject）
+     * @param username 用户名（存入claims）
+     * @return JWT字符串
+     */
     public String generateToken(Long userId, String username) {
         Date now = new Date();
         return Jwts.builder()
@@ -33,11 +48,18 @@ public class JwtUtils {
                 .compact();
     }
 
+    /**
+     * 从Token中提取用户ID
+     */
     public Long getUserIdFromToken(String token) {
         Claims claims = parseToken(token);
         return Long.valueOf(claims.getSubject());
     }
 
+    /**
+     * 校验Token是否有效
+     * @return true有效，false无效或已过期
+     */
     public boolean validateToken(String token) {
         try {
             parseToken(token);
@@ -47,6 +69,9 @@ public class JwtUtils {
         }
     }
 
+    /**
+     * 解析Token的Claims
+     */
     private Claims parseToken(String token) {
         return Jwts.parser()
                 .verifyWith(key)

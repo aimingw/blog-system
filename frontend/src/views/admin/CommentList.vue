@@ -2,11 +2,13 @@
   <div>
     <h2 class="page-title">评论管理</h2>
 
+    <!-- 评论列表表格 -->
     <el-table :data="comments" v-loading="loading" class="styled-table">
       <el-table-column prop="id" label="ID" width="70" align="center" />
       <el-table-column prop="nickName" label="评论者" width="120" />
       <el-table-column prop="content" label="内容" min-width="200" show-overflow-tooltip />
       <el-table-column prop="articleId" label="文章ID" width="90" align="center" />
+      <!-- 审核状态列 -->
       <el-table-column label="状态" width="90" align="center">
         <template #default="{ row }">
           <span class="status-tag" :class="statusClass(row.status)">
@@ -17,6 +19,7 @@
       <el-table-column label="创建时间" width="160" align="center">
         <template #default="{ row }">{{ formatDate(row.createTime) }}</template>
       </el-table-column>
+      <!-- 操作列：待审核评论可进行通过/拒绝操作 -->
       <el-table-column label="操作" width="240" align="center">
         <template #default="{ row }">
           <el-button v-if="row.status === 0" size="small" text type="success" @click="handleApprove(row.id)">通过</el-button>
@@ -26,6 +29,7 @@
       </el-table-column>
     </el-table>
 
+    <!-- 分页 -->
     <div class="pagination-wrap" v-if="total > 10">
       <el-pagination background layout="prev, pager, next" :total="total" v-model:current-page="page" @current-change="fetchList" />
     </div>
@@ -37,19 +41,27 @@ import { ref, onMounted } from 'vue'
 import { getAdminComments, updateCommentStatus, deleteComment } from '../../api'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
+/** 评论列表 */
 const comments = ref([])
+/** 加载状态 */
 const loading = ref(false)
+/** 当前页码 */
 const page = ref(1)
+/** 总记录数 */
 const total = ref(0)
 
+/** 格式化日期 */
 function formatDate(s) {
   if (!s) return ''
   return new Date(s).toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
 }
 
+/** 审核状态文本映射 */
 function statusText(s) { return s === 1 ? '已通过' : s === 2 ? '已拒绝' : '待审核' }
+/** 审核状态样式映射 */
 function statusClass(s) { return s === 1 ? 'approved' : s === 2 ? 'rejected' : 'pending' }
 
+/** 获取评论列表 */
 async function fetchList() {
   loading.value = true
   try {
@@ -59,18 +71,21 @@ async function fetchList() {
   } finally { loading.value = false }
 }
 
+/** 审核通过评论 */
 async function handleApprove(id) {
   await updateCommentStatus(id, 1)
   ElMessage.success('已通过')
   fetchList()
 }
 
+/** 拒绝评论 */
 async function handleReject(id) {
   await updateCommentStatus(id, 2)
   ElMessage.success('已拒绝')
   fetchList()
 }
 
+/** 删除评论（带确认弹窗） */
 async function handleDelete(id) {
   try {
     await ElMessageBox.confirm('确定删除该评论？', '提示', { type: 'warning' })
@@ -91,6 +106,7 @@ onMounted(fetchList)
   margin-bottom: 20px;
 }
 
+/* 表格样式 */
 .styled-table {
   border-radius: var(--radius-md);
   overflow: hidden;
@@ -117,6 +133,7 @@ onMounted(fetchList)
   border-bottom: 1px solid var(--color-border-light);
 }
 
+/* 状态标签 */
 .status-tag {
   display: inline-block;
   padding: 2px 10px;

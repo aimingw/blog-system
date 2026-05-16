@@ -1,11 +1,14 @@
 <template>
   <el-container class="admin-layout">
+    <!-- 左侧导航栏 -->
     <el-aside width="230px" class="admin-sidebar">
+      <!-- 品牌标识 -->
       <div class="sidebar-brand">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
         <span>Blog Admin</span>
       </div>
 
+      <!-- 侧边菜单：根据路由自动高亮当前项 -->
       <el-menu
         :default-active="activeMenu"
         router
@@ -41,7 +44,9 @@
       </el-menu>
     </el-aside>
 
+    <!-- 右侧主内容区 -->
     <el-container class="admin-main">
+      <!-- 顶部导航栏：用户名 + 操作按钮 -->
       <el-header class="admin-header">
         <div class="header-left">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -56,6 +61,7 @@
         </div>
       </el-header>
 
+      <!-- 子路由页面渲染区 -->
       <el-main class="admin-content">
         <router-view />
       </el-main>
@@ -72,9 +78,12 @@ const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 
+/** 根据当前路由路径计算激活菜单项 */
 const activeMenu = computed(() => route.path)
+/** 从Store获取当前登录用户名 */
 const username = computed(() => userStore.userInfo?.username || 'Admin')
 
+/** 退出登录：清除状态并跳转到登录页 */
 function handleLogout() {
   userStore.logout()
   router.push('/admin/login')
@@ -86,7 +95,7 @@ function handleLogout() {
   min-height: 100vh;
 }
 
-/* ====== Sidebar ====== */
+/* ====== 侧边栏 ====== */
 .admin-sidebar {
   background: #1e293b;
   overflow: hidden;
@@ -140,7 +149,7 @@ function handleLogout() {
   font-size: 17px;
 }
 
-/* ====== Header ====== */
+/* ====== 顶部栏 ====== */
 .admin-main {
   background: var(--color-bg);
 }
@@ -170,7 +179,7 @@ function handleLogout() {
   gap: 8px;
 }
 
-/* ====== Content ====== */
+/* ====== 内容区 ====== */
 .admin-content {
   padding: 24px;
 }

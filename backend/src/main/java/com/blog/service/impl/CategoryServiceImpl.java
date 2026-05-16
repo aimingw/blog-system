@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * 分类服务实现类
+ */
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
@@ -22,6 +25,9 @@ public class CategoryServiceImpl implements CategoryService {
         this.articleMapper = articleMapper;
     }
 
+    /**
+     * 查询所有分类（按创建时间倒序）
+     */
     @Override
     public List<Category> listAll() {
         return categoryMapper.selectList(
@@ -33,8 +39,13 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryMapper.selectById(id);
     }
 
+    /**
+     * 新增或更新分类
+     * 校验分类名称不能重复
+     */
     @Override
     public void saveOrUpdate(Category category) {
+        // 检查同名分类是否已存在
         Category exist = categoryMapper.selectOne(
                 new LambdaQueryWrapper<Category>().eq(Category::getName, category.getName()));
         if (exist != null && !exist.getId().equals(category.getId())) {
@@ -47,6 +58,10 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
+    /**
+     * 删除分类
+     * 若该分类下还有文章则不允许删除
+     */
     @Override
     public void deleteById(Long id) {
         Long count = articleMapper.selectCount(

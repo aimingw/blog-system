@@ -1,14 +1,16 @@
 <template>
   <div class="comment-section">
+    <!-- 评论区标题 -->
     <h3 class="comment-heading">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       评论
       <span class="comment-count">{{ comments.length }}</span>
     </h3>
 
-    <!-- Comment Form -->
+    <!-- 评论提交表单 -->
     <div class="comment-form">
       <el-form :model="form" :rules="rules" ref="formRef" @keyup.enter="handleSubmit">
+        <!-- 昵称和邮箱并排 -->
         <el-row :gutter="14">
           <el-col :span="12">
             <el-form-item prop="nickName">
@@ -21,6 +23,7 @@
             </el-form-item>
           </el-col>
         </el-row>
+        <!-- 评论内容 -->
         <el-form-item prop="content">
           <el-input
             v-model="form.content"
@@ -39,14 +42,16 @@
       </el-form>
     </div>
 
-    <!-- Comments List -->
+    <!-- 评论列表为空时 -->
     <div v-if="comments.length === 0" class="no-comments">
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
       <p>还没有评论，来说两句</p>
     </div>
 
+    <!-- 评论列表 -->
     <div v-for="c in comments" :key="c.id" class="comment-item">
       <div class="comment-header">
+        <!-- 头像：取昵称首字 -->
         <span class="comment-avatar">{{ c.nickName.charAt(0) }}</span>
         <div class="comment-author">
           <strong>{{ c.nickName }}</strong>
@@ -63,12 +68,18 @@ import { ref, reactive, onMounted } from 'vue'
 import { getComments, submitComment } from '../../api'
 import { ElMessage } from 'element-plus'
 
+/** 组件属性：所属文章ID */
 const props = defineProps({ articleId: { type: Number, required: true } })
 
+/** 评论列表 */
 const comments = ref([])
+/** 提交按钮加载状态 */
 const submitting = ref(false)
+/** 表单引用 */
 const formRef = ref(null)
+/** 评论表单数据 */
 const form = reactive({ nickName: '', email: '', content: '' })
+/** 表单校验规则 */
 const rules = {
   nickName: [{ required: true, message: '请输入昵称', trigger: 'blur' }],
   email: [
@@ -78,6 +89,7 @@ const rules = {
   content: [{ required: true, message: '请输入评论内容', trigger: 'blur' }]
 }
 
+/** 提交评论 */
 async function handleSubmit() {
   const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
@@ -86,12 +98,13 @@ async function handleSubmit() {
     await submitComment({ articleId: props.articleId, ...form })
     ElMessage.success('评论已提交，审核后显示')
     form.nickName = ''; form.email = ''; form.content = ''
-    await fetchComments()
+    await fetchComments() // 刷新评论列表
   } finally {
     submitting.value = false
   }
 }
 
+/** 获取评论列表 */
 async function fetchComments() {
   try {
     const res = await getComments(props.articleId)
@@ -99,6 +112,7 @@ async function fetchComments() {
   } catch (e) { /* ignore */ }
 }
 
+/** 格式化日期 */
 function formatDate(dateStr) {
   if (!dateStr) return ''
   return new Date(dateStr).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
@@ -145,7 +159,7 @@ onMounted(fetchComments)
   border-color: var(--color-primary-dark);
 }
 
-/* ====== Empty ====== */
+/* ====== 空状态 ====== */
 .no-comments {
   text-align: center;
   padding: 36px 0;
@@ -160,7 +174,7 @@ onMounted(fetchComments)
   font-size: 14px;
 }
 
-/* ====== Comment Items ====== */
+/* ====== 评论项 ====== */
 .comment-item {
   padding: 18px 0;
   border-bottom: 1px solid var(--color-border-light);
@@ -214,7 +228,7 @@ onMounted(fetchComments)
   padding-left: 48px;
 }
 
-/* ====== Override Element Plus form ====== */
+/* 覆盖 Element Plus 表单样式 */
 .comment-form :deep(.el-input__wrapper) {
   border-radius: 8px;
 }

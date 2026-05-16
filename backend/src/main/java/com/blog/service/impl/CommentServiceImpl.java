@@ -8,6 +8,9 @@ import com.blog.mapper.CommentMapper;
 import com.blog.service.CommentService;
 import org.springframework.stereotype.Service;
 
+/**
+ * 评论服务实现类
+ */
 @Service
 public class CommentServiceImpl implements CommentService {
 
@@ -17,6 +20,9 @@ public class CommentServiceImpl implements CommentService {
         this.commentMapper = commentMapper;
     }
 
+    /**
+     * 分页查询评论（支持按文章ID和审核状态筛选）
+     */
     @Override
     public IPage<Comment> pageQuery(Integer page, Integer size, Long articleId, Integer status) {
         LambdaQueryWrapper<Comment> wrapper = new LambdaQueryWrapper<>();
@@ -35,12 +41,18 @@ public class CommentServiceImpl implements CommentService {
         return commentMapper.selectById(id);
     }
 
+    /**
+     * 保存评论，默认状态为待审核（0）
+     */
     @Override
     public void saveComment(Comment comment) {
-        comment.setStatus(0);
+        comment.setStatus(0); // 新评论默认待审核
         commentMapper.insert(comment);
     }
 
+    /**
+     * 更新评论审核状态
+     */
     @Override
     public void updateStatus(Long id, Integer status) {
         Comment comment = new Comment();
@@ -54,6 +66,9 @@ public class CommentServiceImpl implements CommentService {
         commentMapper.deleteById(id);
     }
 
+    /**
+     * 统计某篇文章已审核通过的评论数
+     */
     @Override
     public long countByArticleId(Long articleId) {
         return commentMapper.selectCount(new LambdaQueryWrapper<Comment>()

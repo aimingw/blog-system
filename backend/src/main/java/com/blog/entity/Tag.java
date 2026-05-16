@@ -6,11 +6,18 @@ import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.time.LocalDateTime;
 
+/**
+ * 标签实体类
+ * 对应数据库表 t_tag
+ */
 @TableName("t_tag")
 public class Tag {
+    /** 主键ID（自增） */
     @TableId(type = IdType.AUTO)
     private Long id;
+    /** 标签名称 */
     private String name;
+    /** 创建时间 */
     private LocalDateTime createTime;
 
     public Tag() {}

@@ -6,16 +6,28 @@ import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.time.LocalDateTime;
 
+/**
+ * 文章实体类
+ * 对应数据库表 t_article
+ */
 @TableName("t_article")
 public class Article {
+    /** 主键ID（自增） */
     @TableId(type = IdType.AUTO)
     private Long id;
+    /** 文章标题 */
     private String title;
+    /** 文章正文（Markdown格式） */
     private String content;
+    /** 文章摘要 */
     private String summary;
+    /** 所属分类ID */
     private Long categoryId;
+    /** 文章状态：0草稿，1已发布 */
     private Integer status;
+    /** 创建时间 */
     private LocalDateTime createTime;
+    /** 最后更新时间 */
     private LocalDateTime updateTime;
 
     public Article() {}

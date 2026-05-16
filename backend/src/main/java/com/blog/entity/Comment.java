@@ -6,15 +6,26 @@ import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.time.LocalDateTime;
 
+/**
+ * 评论实体类
+ * 对应数据库表 t_comment
+ */
 @TableName("t_comment")
 public class Comment {
+    /** 主键ID（自增） */
     @TableId(type = IdType.AUTO)
     private Long id;
+    /** 评论所属文章ID */
     private Long articleId;
+    /** 评论者昵称 */
     private String nickName;
+    /** 评论者邮箱 */
     private String email;
+    /** 评论内容 */
     private String content;
+    /** 审核状态：0待审核，1已通过，2已拒绝 */
     private Integer status;
+    /** 创建时间 */
     private LocalDateTime createTime;
 
     public Comment() {}

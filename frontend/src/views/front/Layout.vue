@@ -1,11 +1,14 @@
 <template>
   <div class="front-layout">
+    <!-- 顶部导航栏 -->
     <Navbar />
+    <!-- 页面主体内容 -->
     <main class="page-content">
       <div class="container">
         <router-view />
       </div>
     </main>
+    <!-- 页脚 -->
     <Footer />
   </div>
 </template>
@@ -17,6 +20,8 @@ import { useAppStore } from '../../stores/app'
 import { onMounted } from 'vue'
 
 const appStore = useAppStore()
+
+/** 页面挂载时加载站点配置（标题、公告等全局信息） */
 onMounted(() => {
   appStore.fetchSiteConfig()
 })

@@ -17,6 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * 后台文章管理控制器
+ * 提供文章的增删改查接口（管理员权限）
+ */
 @RestController("adminArticleController")
 @RequestMapping("/api/admin/articles")
 public class ArticleController {
@@ -29,6 +33,9 @@ public class ArticleController {
         this.articleTagMapper = articleTagMapper;
     }
 
+    /**
+     * 分页查询文章列表（支持关键词、分类、标签、状态筛选）
+     */
     @GetMapping
     public Result<PageResult<Article>> list(ArticleQueryDTO query) {
         IPage<Article> page = articleService.pageQuery(query);
@@ -40,9 +47,13 @@ public class ArticleController {
         return Result.success(result);
     }
 
+    /**
+     * 根据ID获取文章详情（包含关联的标签ID列表）
+     */
     @GetMapping("/{id}")
     public Result<Map<String, Object>> getById(@PathVariable Long id) {
         Article article = articleService.getById(id);
+        // 查询文章关联的所有标签
         List<ArticleTag> ats = articleTagMapper.selectList(
                 new LambdaQueryWrapper<ArticleTag>().eq(ArticleTag::getArticleId, id));
         List<Long> tagIds = ats.stream().map(ArticleTag::getTagId).collect(Collectors.toList());
@@ -52,6 +63,9 @@ public class ArticleController {
         return Result.success(data);
     }
 
+    /**
+     * 创建新文章
+     */
     @PostMapping
     public Result<?> create(@RequestBody ArticleDTO articleDTO) {
         articleDTO.setId(null);
@@ -59,12 +73,18 @@ public class ArticleController {
         return Result.success();
     }
 
+    /**
+     * 更新已有文章
+     */
     @PutMapping
     public Result<?> update(@RequestBody ArticleDTO articleDTO) {
         articleService.saveOrUpdate(articleDTO);
         return Result.success();
     }
 
+    /**
+     * 删除文章（同时删除关联的标签关系）
+     */
     @DeleteMapping("/{id}")
     public Result<?> delete(@PathVariable Long id) {
         articleService.deleteById(id);

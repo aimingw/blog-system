@@ -3,14 +3,25 @@ package com.blog.dto;
 import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 
+/**
+ * 文章数据传输对象
+ * 用于接收前端提交的文章表单数据
+ */
 public class ArticleDTO {
+    /** 文章ID（编辑时传入） */
     private Long id;
+    /** 文章标题（必填） */
     @NotBlank(message = "Title is required")
     private String title;
+    /** 文章正文内容 */
     private String content;
+    /** 文章摘要 */
     private String summary;
+    /** 所属分类ID */
     private Long categoryId;
+    /** 文章状态：0草稿，1已发布 */
     private Integer status;
+    /** 关联标签ID列表 */
     private List<Long> tagIds;
 
     public ArticleDTO() {}

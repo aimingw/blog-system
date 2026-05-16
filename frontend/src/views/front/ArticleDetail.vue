@@ -1,9 +1,10 @@
 <template>
   <div class="article-page" v-if="article">
-    <!-- Reading Progress Bar -->
+    <!-- 阅读进度条 -->
     <div class="progress-bar" :style="{ width: progressPercent + '%' }"></div>
 
     <article class="article-detail">
+      <!-- 文章头部：标题 + 元信息 -->
       <header class="article-header">
         <h1 class="article-title">{{ article.title }}</h1>
         <div class="article-meta">
@@ -11,6 +12,7 @@
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             {{ formatDate(article.createTime) }}
           </span>
+          <!-- 所属分类 -->
           <span v-if="category" class="meta-item meta-category">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
             {{ category.name }}
@@ -18,9 +20,10 @@
         </div>
       </header>
 
+      <!-- 文章正文（Markdown 渲染） -->
       <div class="article-body md-content" v-html="renderedContent"></div>
 
-      <!-- Appreciation placeholder -->
+      <!-- 赞赏区域 -->
       <div class="appreciation">
         <div class="appreciation-divider">
           <span>— 感谢阅读 —</span>
@@ -31,7 +34,7 @@
         </div>
       </div>
 
-      <!-- Prev / Next Navigation -->
+      <!-- 上一篇 / 下一篇导航 -->
       <nav class="article-nav">
         <div class="nav-item prev" v-if="prev">
           <router-link :to="`/article/${prev.id}`">
@@ -49,7 +52,7 @@
       </nav>
     </article>
 
-    <!-- Comments -->
+    <!-- 评论区 -->
     <div class="comments-wrapper">
       <CommentSection :article-id="article.id" />
     </div>
@@ -57,34 +60,45 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, inject } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import { getArticle, getCategories } from '../../api'
 import CommentSection from '../../components/front/CommentSection.vue'
 
 const route = useRoute()
+/** 注入 Markdown 渲染函数 */
 const marked = inject('marked')
+
+/** 文章数据 */
 const article = ref(null)
+/** 上一篇文章 */
 const prev = ref(null)
+/** 下一篇文章 */
 const next = ref(null)
+/** 分类列表 */
 const categories = ref([])
+/** 阅读进度百分比 */
 const progressPercent = ref(0)
 
+/** 计算当前文章所属分类 */
 const category = computed(() => {
   if (!article.value?.categoryId) return null
   return categories.value.find(c => c.id === article.value.categoryId)
 })
 
+/** 渲染 Markdown 内容为 HTML */
 const renderedContent = computed(() => {
   if (!article.value?.content) return ''
   return marked(article.value.content)
 })
 
+/** 格式化日期 */
 function formatDate(dateStr) {
   if (!dateStr) return ''
   return new Date(dateStr).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
+/** 监听滚动事件，更新阅读进度条 */
 function handleScroll() {
   const scrollTop = window.scrollY
   const docHeight = document.documentElement.scrollHeight - window.innerHeight
@@ -95,24 +109,34 @@ function handleScroll() {
   progressPercent.value = Math.min(100, Math.round((scrollTop / docHeight) * 100))
 }
 
-onMounted(async () => {
-  window.addEventListener('scroll', handleScroll, { passive: true })
+async function fetchArticle(id) {
   try {
-    const res = await getArticle(route.params.id)
+    const res = await getArticle(id)
     article.value = res.data.article
     prev.value = res.data.prev
     next.value = res.data.next
   } catch (e) {}
+}
+
+onMounted(async () => {
+  window.addEventListener('scroll', handleScroll, { passive: true })
+  await fetchArticle(route.params.id)
   try { const r = await getCategories(); categories.value = r.data || [] } catch (e) {}
 })
 
+watch(() => route.params.id, async (newId) => {
+  await fetchArticle(newId)
+  window.scrollTo({ top: 0 })
+})
+
+/** 组件卸载时移除滚动监听 */
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
 })
 </script>
 
 <style scoped>
-/* ====== Progress Bar ====== */
+/* ====== 阅读进度条 ====== */
 .progress-bar {
   position: fixed;
   top: 0;
@@ -124,7 +148,7 @@ onUnmounted(() => {
   border-radius: 0 2px 2px 0;
 }
 
-/* ====== Article ====== */
+/* ====== 文章详情 ====== */
 .article-page {
   max-width: var(--content-width);
   margin: 0 auto;
@@ -172,7 +196,7 @@ onUnmounted(() => {
   font-size: 12px;
 }
 
-/* ====== Appreciation ====== */
+/* ====== 赞赏区 ====== */
 .appreciation {
   text-align: center;
   padding: 36px 0 12px;
@@ -224,7 +248,7 @@ onUnmounted(() => {
   transform: scale(1.05);
 }
 
-/* ====== Prev/Next Nav ====== */
+/* ====== 上一篇/下一篇导航 ====== */
 .article-nav {
   display: flex;
   gap: 16px;
@@ -274,7 +298,7 @@ onUnmounted(() => {
   text-align: right;
 }
 
-/* ====== Comments Wrapper ====== */
+/* ====== 评论区 ====== */
 .comments-wrapper {
   max-width: var(--content-width);
   margin: 40px auto;

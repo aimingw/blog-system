@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+/**
+ * 后台评论管理控制器
+ * 提供评论的查询、审核、删除接口（管理员权限）
+ */
 @RestController("adminCommentController")
 @RequestMapping("/api/admin/comments")
 public class CommentController {
@@ -19,6 +23,9 @@ public class CommentController {
         this.commentService = commentService;
     }
 
+    /**
+     * 分页查询评论列表（支持按文章ID和审核状态筛选）
+     */
     @GetMapping
     public Result<PageResult<Comment>> list(@RequestParam(defaultValue = "1") Integer page,
                                             @RequestParam(defaultValue = "10") Integer size,
@@ -33,12 +40,18 @@ public class CommentController {
         return Result.success(result);
     }
 
+    /**
+     * 更新评论审核状态（通过/拒绝）
+     */
     @PutMapping("/{id}/status")
     public Result<?> updateStatus(@PathVariable Long id, @RequestBody Map<String, Integer> body) {
         commentService.updateStatus(id, body.get("status"));
         return Result.success();
     }
 
+    /**
+     * 删除评论
+     */
     @DeleteMapping("/{id}")
     public Result<?> delete(@PathVariable Long id) {
         commentService.deleteById(id);

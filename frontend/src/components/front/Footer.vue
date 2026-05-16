@@ -1,10 +1,13 @@
 <template>
+  <!-- 页脚组件 -->
   <footer class="footer">
     <div class="container footer-inner">
       <div class="footer-brand">
+        <!-- 站点标题 -->
         <span class="footer-logo">{{ siteTitle }}</span>
         <span class="footer-desc">用文字记录思考</span>
       </div>
+      <!-- 版权信息 -->
       <p class="footer-copy">&copy; {{ year }} {{ siteTitle }}. Built with Vue & Spring Boot</p>
     </div>
   </footer>
@@ -15,7 +18,9 @@ import { computed } from 'vue'
 import { useAppStore } from '../../stores/app'
 
 const appStore = useAppStore()
+/** 当前年份 */
 const year = new Date().getFullYear()
+/** 从站点配置获取标题 */
 const siteTitle = computed(() => appStore.siteConfig?.title || 'My Blog')
 </script>
 

@@ -1,5 +1,6 @@
 <template>
   <div class="category-page">
+    <!-- 分类页面头部 -->
     <header class="page-header">
       <h2 class="page-title">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
@@ -8,12 +9,15 @@
       <p class="page-count" v-if="total">共 {{ total }} 篇文章</p>
     </header>
 
+    <!-- 该分类下的文章列表 -->
     <div class="articles-list">
       <ArticleCard v-for="article in articles" :key="article.id" :article="article" :categories="categories" />
+      <!-- 空状态 -->
       <div v-if="articles.length === 0" class="empty-state">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
         <p>该分类下暂无文章</p>
       </div>
+      <!-- 分页 -->
       <div class="pagination" v-if="total > size">
         <el-pagination background layout="prev, pager, next" :total="total" :page-size="size" v-model:current-page="page" @current-change="fetchArticles" />
       </div>
@@ -22,30 +26,45 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getArticles, getCategories } from '../../api'
 import ArticleCard from '../../components/front/ArticleCard.vue'
 
 const route = useRoute()
+/** 文章列表 */
 const articles = ref([])
+/** 分类列表 */
 const categories = ref([])
+/** 当前分类名称 */
 const categoryName = ref('')
+/** 当前页码 */
 const page = ref(1)
+/** 每页条数 */
 const size = ref(10)
+/** 总记录数 */
 const total = ref(0)
 
+/** 按分类ID获取文章列表 */
 async function fetchArticles() {
   const res = await getArticles({ page: page.value, size: size.value, categoryId: route.params.id })
   articles.value = res.data.records
   total.value = res.data.total
 }
 
-onMounted(async () => {
+async function loadData() {
   try { const r = await getCategories(); categories.value = r.data || [] } catch (e) {}
   const cat = categories.value.find(c => c.id == route.params.id)
   categoryName.value = cat?.name || ''
+  page.value = 1
   await fetchArticles()
+}
+
+onMounted(loadData)
+
+watch(() => route.params.id, async () => {
+  await loadData()
+  window.scrollTo({ top: 0 })
 })
 </script>
 
@@ -73,10 +92,6 @@ onMounted(async () => {
   color: var(--color-text-muted);
   margin-top: 4px;
   margin-left: 28px;
-}
-
-.articles-list {
-  /* same as home */
 }
 
 .empty-state {

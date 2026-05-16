@@ -1,17 +1,22 @@
 <template>
+  <!-- 顶部导航栏：粘性定位，滚动时添加阴影 -->
   <header class="navbar" :class="{ scrolled: scrolled }">
     <div class="container nav-inner">
+      <!-- 网站LOGO/标题 -->
       <router-link to="/" class="logo">{{ siteTitle }}</router-link>
+      <!-- 桌面端导航链接 -->
       <nav class="nav-links">
         <router-link to="/">首页</router-link>
         <router-link to="/about">关于</router-link>
       </nav>
+      <!-- 移动端汉堡菜单按钮 -->
       <button class="menu-btn" @click="menuOpen = !menuOpen" :aria-label="menuOpen ? '关闭菜单' : '打开菜单'">
         <span></span>
         <span></span>
         <span></span>
       </button>
     </div>
+    <!-- 移动端下拉菜单 -->
     <div class="mobile-nav" :class="{ open: menuOpen }">
       <router-link to="/" @click="menuOpen = false">首页</router-link>
       <router-link to="/about" @click="menuOpen = false">关于</router-link>
@@ -24,11 +29,15 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAppStore } from '../../stores/app'
 
 const appStore = useAppStore()
+/** 移动端菜单开关 */
 const menuOpen = ref(false)
+/** 是否已滚动（用于添加阴影效果） */
 const scrolled = ref(false)
 
+/** 从站点配置获取标题 */
 const siteTitle = computed(() => appStore.siteConfig?.title || 'My Blog')
 
+/** 监听滚动事件 */
 function onScroll() {
   scrolled.value = window.scrollY > 10
 }
@@ -92,7 +101,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
   background: var(--color-primary-bg);
 }
 
-/* Mobile menu button */
+/* 移动端菜单按钮 */
 .menu-btn {
   display: none;
   background: none;
